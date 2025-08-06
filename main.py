@@ -6,6 +6,7 @@ from agents.character_agent import CharacterAgent
 from agents.script_agent import ScriptAgent
 from agents.voice_agent import VoiceAgent
 from agents.visual_agent import VisualAgent
+from utils.qa import run_video_qa
 
 def main():
     print("🎬 Welcome to Content Factory")
@@ -62,6 +63,8 @@ def main():
     for i, lesson in enumerate(curriculum, 1):
         print(f"{i}. {lesson['title']} - {lesson['summary']}")
 
+    print("=" * 150)
+
     # Assigning a new/ already existing character
     char_name = input("\nEnter a character name: ").strip()
     if not char_name:
@@ -79,6 +82,9 @@ def main():
     except Exception as e:
         print(f"❌ Error creating character: {e}")
         return
+
+    print("=" * 150)
+    print("\n")
 
     # Generate script for ALL lessons
     try:
@@ -98,6 +104,8 @@ def main():
     except Exception as e:
         print(f"❌ Error generating scripts: {e}")
         return
+
+    print("=" * 150)
 
     # Generate voice for ALL lessons
     for idx, script_item in enumerate(scripts, 1):
@@ -120,10 +128,13 @@ def main():
             
             script_item["voice_path"] = voice_path
             script_item["timing_data"] = timing_data
+            script_item["character"] = character
 
         except Exception as e:
             print(f"❌ Error generating voice for Lesson {idx}: {e}")
             continue
+    
+    print("=" * 150)
 
     # Generate video for ALL lessons
     for idx, script_item in enumerate(scripts, 1):
@@ -168,8 +179,29 @@ def main():
                 else:
                     print("  📌 Emphasis points: None")
 
+            # Calling the video generator agent
             video_path = coordinator.run_agent("visual", video_input)
             print(f"\n✅ Success! Video saved at: {video_path}")
+            
+            print("=" * 150)
+
+            # QA report
+            try:
+                slides = visual_agent.script_parser.parse_script_to_slides(
+                    script_item["script"], character["name"]
+                )
+            except Exception as err:
+                slides = None
+                print(f"⚠️ Could not parse slides for QA: {err}")
+
+            # print("Script item", script_item)
+            # print("Slides", slides)
+
+            try:
+                print("🔎 Running QA checks for generated video...")
+                run_video_qa(script_item, slides=slides, output_dir="logs")
+            except Exception as err:
+                print(f"❌ QA failed: {err}")
 
         except Exception as e:
             print(f"❌ Error generating video for Lesson {idx}: {e}")
@@ -179,6 +211,7 @@ def main():
 
     print("\n🎉 Content generation complete with synchronized audio!")
 
+    print("=" * 150)
 
 if __name__ == "__main__":
     try:

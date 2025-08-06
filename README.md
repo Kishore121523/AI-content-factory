@@ -195,40 +195,68 @@ python debug_voice_styles.py
 ## 🧩 Project Structure
 
 ```
-content-factory/
-├── agents/
-│   ├── base_agent.py              # Base agent class
-│   ├── character_agent.py         # Character generation
-│   ├── curriculum_agent.py        # Lesson planning
-│   ├── script_agent.py           # Script writing
-│   ├── voice_agent.py            # Voice synthesis
-│   └── visual_agent/             # Video generation (modular)
+content-factory/                                        
+├── agents/                                       # Core agent modules
+│   ├── __pycache__/                              # Python bytecode cache
+│   ├── base_agent.py                             # Base agent class (common logic for all agents)
+│   ├── character_agent.py                        # Character creation/generation agent
+│   ├── curriculum_agent.py                       # Lesson/curriculum planning agent
+│   ├── script_agent.py                           # Script writing/generation agent
+│   ├── voice_agent/                              # Voice synthesis and processing
+│   │   ├── __pycache__/
+│   │   ├── __init__.py
+│   │   ├── audio_synthesizer.py                  # Voice audio synthesis logic
+│   │   ├── constants.py                          # Voice agent configuration/constants
+│   │   ├── script_processor.py                   # Processes scripts for TTS
+│   │   ├── ssml_builder.py                       # Builds SSML for expressive speech
+│   │   ├── style_manager.py                      # Handles voice styles/parameters
+│   │   └── voice_agent.py                        # Main voice agent orchestration
+│   └── visual_agent/                             # Video generation and overlays
+│       ├── __pycache__/
 │       ├── __init__.py
-│       ├── visual_agent.py       # Main visual agent
-│       ├── avatar_manager.py     # Avatar handling
-│       ├── constants.py          # Configuration
-│       ├── script_parser.py      # Script parsing
-│       ├── slide_renderer.py     # Slide creation
-│       ├── text_utils.py         # Text operations
-│       ├── ui_components.py      # UI elements
-│       └── video_composer.py     # Video assembly
-├── avatars/                      # Character avatar images
+│       ├── avatar_manager.py                     # Avatar image handling/selection
+│       ├── constants.py                          # Visual agent configuration/constants
+│       ├── moviepy_overlay_manager.py            # Adds overlays (e.g., captions, graphics)
+│       ├── script_parser.py                      # Parses scripts for visual rendering
+│       ├── slide_renderer.py                     # Creates individual slides
+│       ├── text_utils.py                         # Text formatting, splitting, utilities
+│       ├── ui_components.py                      # Draws UI-like elements on slides
+│       ├── video_composer.py                     # Assembles video from slides and audio
+│       └── visual_agent.py                       # Main visual agent (video pipeline)
+├── avatars/                                      # Character/avatar images
 │   ├── female/
-│   │   └── avatar_1-3.png
+│   │   ├── avatar_1.gif                          # Female avatar (GIF animation)
+│   │   ├── avatar_1.png
+│   │   ├── avatar_2.png
+│   │   └── avatar_3.png
 │   └── male/
-│       └── avatar_1-3.png
-├── config/
-│   └── moviepy_config.py         # MoviePy configuration
-├── output/                       # Generated content
-├── utils/
-│   └── db.py                     # Database utilities
-├── coordinator.py                # Agent orchestration
-├── main.py                      # Main entry point
-├── test_video_gen.py            # Video testing tool
-├── debug_voice_styles.py        # Voice testing tool
-├── requirements.txt             # Python dependencies
-├── .env.example                 # Environment template
-└── README.md                    # This file
+│       ├── avatar_1.gif                          # Male avatar (GIF animation)
+│       ├── avatar_1.png
+│       ├── avatar_2.png
+│       └── avatar_3.png
+├── databaseFunctions/                            # Scripts for managing the DB
+│   ├── reset_db.py                               # Reset/initialize database
+│   └── view_characters.py                        # Script to view character entries
+├── logs/                                         # Stores the logs generated from QA check
+├── output/                                       # Generated audio/video/output files
+│   ├── David_Introduction_to_Retrieval-Augmented_Generation_(RAG).mp3      # Sample output (audio)
+│   ├── David_Introduction_to_Retrieval-Augmented_Generation_(RAG).mp4      # Sample output (video)
+│   └── David_Introduction_to_Retrieval-Augmented_Generation_(RAG)_timing.json # Output timings
+├── utils/                                        # Utility/helper scripts
+│   ├── __pycache__/
+│   └── db.py                                     # DB connection/utilities
+│   └── qa.py                                     # QA checks after each video generation
+├── venv/                                         # Python virtual environment
+│   └── [virtual environment files]
+├── .gitignore                                    # Git ignore file
+├── content_factory.db                            # SQLite database file
+├── coordinator.py                                # Main agent orchestration logic
+├── main.py                                       # Project entry point script
+├── README.md                                     # Project documentation
+├── requirements.txt                              # Python dependencies
+├── test_voice_styles.py                          # Voice style test script
+└── test_video_gen.py                             # Video generation test script
+
 ```
 
 ## 🎨 Customization

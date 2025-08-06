@@ -1,0 +1,18 @@
+Timing segments: 12
+Character: Kishore (Avatar: 3, Style: clear and engaging)
+⚠️ Slide/Speaker mismatch at 2: slide='Kishore' vs timing='Narrator'
+⚠️ Slide/Speaker mismatch at 3: slide='Narrator' vs timing='Kishore'
+⚠️ Slide/Speaker mismatch at 4: slide='Kishore' vs timing='Narrator'
+⚠️ Slide/Speaker mismatch at 5: slide='Narrator' vs timing='Kishore'
+⚠️ Slide/Speaker mismatch at 6: slide='Kishore' vs timing='Narrator'
+⚠️ Slide/Speaker mismatch at 7: slide='Narrator' vs timing='Kishore'
+⚠️ Slide/Speaker mismatch at 8: slide='Kishore' vs timing='Narrator'
+⚠️ Slide/Speaker mismatch at 10: slide='Narrator' vs timing='Kishore'
+⚠️ Slide/Speaker mismatch at 12: slide='Kishore' vs timing='end'
+All caption triggers found in script.
+⚠️ Highlight keywords not found in script: ['tectonic collision']
+5 highlight keywords: Everest, Himalayas, tectonic collision, geology, uplift
+3 caption(s)
+2 emphasis point(s)
+⚠️ Overlay collision: Caption 'Explore majestic peaks' and Emphasis 'Tectonic Plates: Earth's ' overlap (3.00-14.99s)
+⚠️ Overlay collision: Caption 'Earth’s gradual shifting' and Emphasis 'Everest formed by Indian-' overlap (63.68-71.68s)
