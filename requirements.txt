@@ -1,0 +1,10 @@
+# pip install -r requirements.txt
+python-dotenv
+openai
+azure-cognitiveservices-speech
+moviepy==1.0.3
+imageio==2.31.1
+imageio-ffmpeg==0.4.8
+Pillow==10.0.0
+numpy==1.24.3
+pydub
