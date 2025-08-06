@@ -201,47 +201,34 @@ content-factory/
 │   ├── character_agent.py         # Character generation
 │   ├── curriculum_agent.py        # Lesson planning
 │   ├── script_agent.py           # Script writing
-│   ├── voice_agent/
-│   │    ├── __init__.py           # Package init
-│   │    ├── voice_agent.py        # Main agent (orchestrator)
-│   │    ├── constants.py          # All constants and mappings
-│   │    ├── style_manager.py      # Voice style and emotion management
-│   │    ├── script_processor.py   # Script parsing and text processing
-│   │    ├── ssml_builder.py       # SSML document creation
-│   │    └── audio_synthesizer.py  # Audio synthesis and combination
-│   └── visual_agent/              # Video generation (modular)
+│   ├── voice_agent.py            # Voice synthesis
+│   └── visual_agent/             # Video generation (modular)
 │       ├── __init__.py
-│       ├── visual_agent.py        # Main visual agent
-│       ├── avatar_manager.py      # Avatar handling
-│       ├── constants.py           # Configuration
-│       ├── script_parser.py       # Script parsing
-│       ├── slide_renderer.py      # Slide creation
-│       ├── text_utils.py          # Text operations
-│       ├── ui_components.py       # UI elements
-│       └── video_composer.py      # Video assembly
-├── avatars/                       # Character avatar images
+│       ├── visual_agent.py       # Main visual agent
+│       ├── avatar_manager.py     # Avatar handling
+│       ├── constants.py          # Configuration
+│       ├── script_parser.py      # Script parsing
+│       ├── slide_renderer.py     # Slide creation
+│       ├── text_utils.py         # Text operations
+│       ├── ui_components.py      # UI elements
+│       └── video_composer.py     # Video assembly
+├── avatars/                      # Character avatar images
 │   ├── female/
-│   │   └── [avatar_1-3.png]
+│   │   └── avatar_1-3.png
 │   └── male/
-│       └── [avatar_1-3.png]
-├── databaseFunctions/
-│   ├── reset_db.py
-│   └── view_characters.py
-├── output/
-│   ├── David_Introduction_to_the_Water_Cycle.mp3
-│   ├── David_Introduction_to_the_Water_Cycle.mp4
-│   └── David_Introduction_to_the_Water_Cycle_timing.json
+│       └── avatar_1-3.png
+├── config/
+│   └── moviepy_config.py         # MoviePy configuration
+├── output/                       # Generated content
 ├── utils/
-│   └── db.py                      # Database utilities
-├── coordinator.py                 # Agent orchestration
-├── content_factory.db
-├── main.py                        # Main entry point
-├── test_video_gen.py              # Video testing tool
-├── test_video_gen.py              # Voice testing tool
-├── requirements.txt               # Python dependencies
-├── .env                           # Environment variables
-├── .gitignore
-└── README.md                      # This file
+│   └── db.py                     # Database utilities
+├── coordinator.py                # Agent orchestration
+├── main.py                      # Main entry point
+├── test_video_gen.py            # Video testing tool
+├── debug_voice_styles.py        # Voice testing tool
+├── requirements.txt             # Python dependencies
+├── .env.example                 # Environment template
+└── README.md                    # This file
 ```
 
 ## 🎨 Customization
