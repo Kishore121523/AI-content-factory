@@ -11,7 +11,7 @@ def main():
     print("🎬 Welcome to Content Factory")
     init_db()
 
-    # Step 1: Get topic from user
+    # Get topic from user
     topic = input("Enter your topic: ").strip()
     if not topic:
         print("❌ Topic cannot be empty!")
@@ -34,6 +34,7 @@ def main():
     coordinator.register_agent("voice", voice_agent)
     coordinator.register_agent("visual", visual_agent)
 
+    # Generate curriculum (lesson heading and description)
     print("\n📚 Generating curriculum...")
     max_retries = 3
     curriculum = None
@@ -61,6 +62,7 @@ def main():
     for i, lesson in enumerate(curriculum, 1):
         print(f"{i}. {lesson['title']} - {lesson['summary']}")
 
+    # Assigning a new/ already existing character
     char_name = input("\nEnter a character name: ").strip()
     if not char_name:
         char_name = "Zara"
@@ -78,6 +80,7 @@ def main():
         print(f"❌ Error creating character: {e}")
         return
 
+    # Generate script for ALL lessons
     try:
         scripts = coordinator.run_agent("script", {
             "character": character,
@@ -96,7 +99,7 @@ def main():
         print(f"❌ Error generating scripts: {e}")
         return
 
-    # Voice for ALL lessons:
+    # Generate voice for ALL lessons
     for idx, script_item in enumerate(scripts, 1):
         try:
             print(f"\n🎤 Generating expressive voice for Lesson {idx}: {script_item['lesson']} with SSML and timing synchronization...")
@@ -122,7 +125,7 @@ def main():
             print(f"❌ Error generating voice for Lesson {idx}: {e}")
             continue
 
-    # Video for ALL lessons:
+    # Generate video for ALL lessons
     for idx, script_item in enumerate(scripts, 1):
         try:
             print(f"\n🎬 Generating video for Lesson {idx}: {script_item['lesson']} with synchronized audio (this may take a few minutes)...")
@@ -131,14 +134,39 @@ def main():
                 "character": character,
                 "lesson_title": script_item["lesson"],
                 "script": script_item["script"],
-                "voice_path": script_item.get("voice_path")
+                "voice_path": script_item.get("voice_path"),
+                "overlay_data": script_item.get("overlay_data", {}) 
             }
-
+            
+            # Check if there is a timing data file available and add it to the input
             if script_item.get("timing_data"):
                 video_input["timing"] = script_item["timing_data"]
                 print("✅ Using synchronized timing for video generation")
             else:
                 print("⚠️ No timing data available, using estimated timing")
+            
+            overlay_data = script_item.get("overlay_data", {})
+            if overlay_data:
+                highlight_keywords = overlay_data.get("highlight_keywords", [])
+                caption_phrases = overlay_data.get("caption_phrases", [])
+                emphasis_points = overlay_data.get("emphasis_points", [])
+
+                print("\n🟡 Overlay Data Preview:")
+                print(f"  🎯 Highlight keywords ({len(highlight_keywords)}): {', '.join(highlight_keywords) or 'None'}")
+
+                if caption_phrases:
+                    print(f"  💬 Captions ({len(caption_phrases)}):")
+                    for idx, c in enumerate(caption_phrases, 1):
+                        print(f"    {idx}. \"{c.get('text', '')}\" (trigger: \"{c.get('trigger', '')}\")")
+                else:
+                    print("  💬 Captions: None")
+
+                if emphasis_points:
+                    print(f"  📌 Emphasis points ({len(emphasis_points)}):")
+                    for idx, e in enumerate(emphasis_points, 1):
+                        print(f"    {idx}. [{e.get('type', 'fact')}] {e.get('text', '')}")
+                else:
+                    print("  📌 Emphasis points: None")
 
             video_path = coordinator.run_agent("visual", video_input)
             print(f"\n✅ Success! Video saved at: {video_path}")

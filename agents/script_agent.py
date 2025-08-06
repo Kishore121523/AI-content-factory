@@ -1,5 +1,7 @@
 # agents/script_agent.py
 
+import difflib
+import json
 from agents.base_agent import Agent
 import openai
 import os
@@ -24,10 +26,17 @@ class ScriptAgent(Agent):
         all_scripts = []
         for i, lesson in enumerate(lessons, 1):
             print(f"📘 Generating expressive script for Lesson {i}: {lesson['title']}...")
+
             script = self.generate_script(character, lesson, i)
+
+            # Extract key concepts and overlay points
+            print(f"🔍 Extracting key concepts for dynamic overlays...")
+            overlay_data = self.extract_overlay_data(lesson, script)
+
             all_scripts.append({
                 "lesson": lesson["title"],
-                "script": script
+                "script": script,
+                "overlay_data": overlay_data
             })
         return all_scripts
 
@@ -99,6 +108,98 @@ class ScriptAgent(Agent):
             script = self.add_default_emotions(script, character['name'])
         
         return script
+
+    def extract_overlay_data(self, lesson, script):
+        """Use LLM to extract key concepts and overlay points from the script"""
+        system_prompt = (
+            "You are an educational content analyzer. Given a lesson script, extract:\n"
+            "1. Key terms/concepts that should be highlighted (technical terms, important vocabulary)\n"
+            "2. Important phrases that should appear as captions\n"
+            "- For each caption in caption_phrases:\n"
+            "    - The 'trigger' field must be an exact phrase (verbatim substring) found in the script. Do not invent or paraphrase trigger phrases. Only use phrases that actually appear in the script text.\n"
+            "    - The 'text' field should be a short, punchy, or summarizing caption related to the trigger, but NOT a verbatim repeat. Paraphrase or clarify the meaning in a concise way (under 10 words).\n"
+            "\n"
+            "3. Section markers where visual emphasis would help (as 'emphasis_points').\n"
+            "- For emphasis_points: Always include at least one definition (in the form 'Term: definition') and at least one key_fact (the single most important takeaway or summary statement, even if you must reword the script). \n"
+            "Respond ONLY with valid JSON in this format:\n"
+            "{\n"
+            '  "highlight_keywords": ["term1", "term2", ...],\n'
+            '  "caption_phrases": [\n'
+            '    {"text": "Important phrase", "trigger": "when this is said"},\n'
+            '    ...\n'
+            '  ],\n'
+            '  "emphasis_points": [\n'
+            '    {"type": "definition", "text": "Term: definition"},\n'
+            '    {"type": "key_fact", "text": "Important fact"},\n'
+            '    ...\n'
+            '  ]\n'
+            "}\n"
+            "Example output:\n"
+            "{\n"
+            '  "highlight_keywords": ["transformer", "self-attention"],\n'
+            '  "caption_phrases": [{"text": "Revolutionized AI", "trigger": "revolutionizing AI"}],\n'
+            '  "emphasis_points": [\n'
+            '    {"type": "definition", "text": "Transformer: An AI model that uses self-attention."},\n'
+            '    {"type": "key_fact", "text": "Transformers enable parallel training on large datasets."}\n'
+            '  ]\n'
+            "}"
+        )
+
+        
+        user_prompt = (
+            f"Lesson Title: {lesson['title']}\n"
+            f"Lesson Summary: {lesson['summary']}\n\n"
+            f"Script:\n{script}\n\n"
+            "Extract key concepts, important phrases for captions, and emphasis points."
+            "Focus on educational value and clarity. Keywords should be single words or short phrases."
+            "Caption phrases should be concise (under 10 words)."
+            "For each caption, the 'trigger' must be a short, exact phrase from the script, while the 'text' must be a punchy, summarizing, or paraphrased caption related to the trigger—never just a copy of the trigger."
+            "There must always be at least one definition and one key_fact in emphasis_points, even if you must rewrite or infer from the script."
+            "Never leave the emphasis_points array empty."
+            "Limit to 5-7 keywords, 3-4 captions, and 2-3 emphasis points."
+            "When choosing triggers for caption_phrases, always select a short phrase (up to ~8 words) that appears verbatim in the script. Never make up or paraphrase trigger phrases."
+            "Do NOT include common stopwords or filler words—such as prepositions, pronouns, conjunctions, and articles. "
+            "Avoid capturing stopwords like a, an, the, in, on, was, were, had, has etc - ADD COMMON STOPWORDS TO THE LIST from Prepositions, Pronouns, Conjunctions."
+        )
+
+        try:
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
+            
+            response = self.client.chat.completions.create(
+                model=self.deployment,
+                messages=messages,
+                max_completion_tokens=3000,
+            )
+            
+            overlay_json = response.choices[0].message.content.strip()
+            overlay_data = json.loads(overlay_json)
+            overlay_data = fix_or_validate_caption_triggers(overlay_data, script)
+
+            print(f"✅ Extracted {len(overlay_data.get('highlight_keywords', []))} keywords")
+            print(f"✅ Extracted {len(overlay_data.get('caption_phrases', []))} caption phrases")
+            print(f"✅ Extracted {len(overlay_data.get('emphasis_points', []))} emphasis points")
+            
+            return overlay_data
+            
+        except json.JSONDecodeError as e:
+            print(f"⚠️ Failed to parse overlay JSON: {e}")
+            # Return default structure
+            return {
+                "highlight_keywords": [],
+                "caption_phrases": [],
+                "emphasis_points": []
+            }
+        except Exception as e:
+            print(f"⚠️ Error extracting overlay data: {e}")
+            return {
+                "highlight_keywords": [],
+                "caption_phrases": [],
+                "emphasis_points": []
+            }
+
     
     def extract_personality(self, character):
         """Extract personality traits from character description"""
@@ -147,3 +248,41 @@ class ScriptAgent(Agent):
                 script = script.replace(old, new, 1)
         
         return script
+
+@staticmethod
+def fix_or_validate_caption_triggers(overlay_data, script, min_ratio=0.6):
+    """
+    Ensure each caption trigger is a substring of the script. If not, replace it
+    with the closest match found in the script using fuzzy matching.
+    """
+    script_lower = script.lower()
+    words = script_lower.split()
+    valid_captions = []
+
+    for c in overlay_data.get('caption_phrases', []):
+        trigger = c['trigger'].strip().lower()
+
+        if trigger in script_lower:
+            valid_captions.append(c)
+            continue
+
+        best_match = None
+        best_ratio = 0
+
+        trigger_len = len(trigger.split())
+        for i in range(len(words) - trigger_len + 1):
+            window = ' '.join(words[i:i + trigger_len])
+            ratio = difflib.SequenceMatcher(None, trigger, window).ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_match = window
+
+        if best_ratio >= min_ratio and best_match:
+            print(f"🔄 Replacing trigger '{trigger}' with closest match in script: '{best_match}' (ratio={best_ratio:.2f})")
+            c['trigger'] = best_match
+            valid_captions.append(c)
+        else:
+            print(f"⚠️ WARNING: Could not find suitable match for caption trigger: '{trigger}'. Removing this caption.")
+
+    overlay_data['caption_phrases'] = valid_captions
+    return overlay_data

@@ -27,18 +27,6 @@ class VideoComposer:
         final_video = final_video.set_duration(audio_clip.duration)
         final_video = final_video.set_audio(audio_clip)
         
-        # Save video
-        print(f"💾 Rendering video to: {output_path}")
-        final_video.write_videofile(
-            output_path,
-            codec=VIDEO_CODEC,
-            audio_codec=AUDIO_CODEC,
-            fps=self.fps,
-            preset=VIDEO_PRESET,
-            threads=VIDEO_THREADS,
-            bitrate=VIDEO_BITRATE
-        )
-        
         return final_video
     
     def calculate_slide_timings_from_voice(self, slides: List[Dict], timing_data: List[Dict], 

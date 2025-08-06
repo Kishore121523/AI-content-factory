@@ -1,5 +1,6 @@
 # ui_components.py - Reusable UI Component Rendering
 
+import re
 from PIL import ImageDraw
 from typing import List, Tuple
 from .constants import *
@@ -109,31 +110,113 @@ class UIComponents:
         draw.text((x, y), text, font=font, fill=COLORS['speaker_text'])
         
         return badge_rect
+
+    @staticmethod
+    def preprocess_phrases(phrases):
+        # Tokenize phrases: 'rag agents' -> ['rag', 'agents']
+        return [re.findall(r"\w+", phrase.lower()) for phrase in phrases if phrase]
     
-    def draw_speech_bubble(self, draw: ImageDraw.Draw, bubble_rect: List[int], 
-                          text_lines: List[str], is_character: bool):
-        """Draw speech bubble with text"""
+    def draw_speech_bubble(self, draw: ImageDraw.Draw, bubble_rect, is_character):
+        """Draw only the bubble (shape + shadow), no text."""
         # Shadow
         shadow_rect = [bubble_rect[0] + 3, bubble_rect[1] + 3, 
-                      bubble_rect[2] + 3, bubble_rect[3] + 3]
+                    bubble_rect[2] + 3, bubble_rect[3] + 3]
         draw.rectangle(shadow_rect, fill=COLORS['shadow'])
-        
-        # Bubble
+        # Bubble main
         if is_character:
             fill_color = COLORS['character_bubble']
             outline_color = COLORS['character_border']
         else:
             fill_color = COLORS['narrator_bubble']
             outline_color = COLORS['narrator_border']
-        
         draw.rectangle(bubble_rect, fill=fill_color, outline=outline_color, width=3)
-        
-        # Text
-        font = self.text_manager.get_font('body')
+
+    def draw_highlighted_text_with_phrases(self, img, bubble_rect, wrapped_lines, highlight_phrases, font):
+        """
+        Draw text with phrase/keyword highlighting inside a speech bubble, preserving original spacing and punctuation.
+        """
+        import re
+        draw = ImageDraw.Draw(img)
         line_height = font.size * LAYOUT['line_spacing']
         text_x = bubble_rect[0] + LAYOUT['bubble_padding']
         text_y = bubble_rect[1] + LAYOUT['bubble_padding']
-        
-        for i, line in enumerate(text_lines):
-            line_y = text_y + i * line_height
-            draw.text((text_x, line_y), line, font=font, fill=COLORS['body_text'])
+
+        # Prepare highlight phrases as list of lists, sorted longest first
+        highlight_token_lists = self.preprocess_phrases(highlight_phrases)
+        highlight_token_lists.sort(key=len, reverse=True)
+
+        for line_idx, line in enumerate(wrapped_lines):
+            current_x = text_x
+            current_y = text_y + line_idx * line_height
+
+            # Tokenize words + punctuation, but keep original positions
+            tokens = re.findall(r'\w+|[^\w]', line)
+
+            i = 0
+            while i < len(tokens):
+                matched = False
+                # Attempt to match a phrase at current position
+                for phrase_tokens in highlight_token_lists:
+                    n = len(phrase_tokens)
+                    # Extract a window of n tokens, skipping spaces and punctuation for matching
+                    window = []
+                    word_indices = []  # Track indices of actual words (not spaces/punctuation)
+                    j = i
+                    while len(window) < n and j < len(tokens):
+                        if tokens[j].strip() and re.match(r'\w+', tokens[j]):  # is a word
+                            window.append(tokens[j].lower())
+                            word_indices.append(j)
+                        j += 1
+                    
+                    if window == phrase_tokens:
+                        # Draw any spaces/punctuation BEFORE the highlight
+                        pre_highlight_idx = i
+                        while pre_highlight_idx < len(tokens) and (pre_highlight_idx not in word_indices):
+                            token = tokens[pre_highlight_idx]
+                            bbox = draw.textbbox((0, 0), token, font=font)
+                            token_width = bbox[2] - bbox[0]
+                            draw.text((current_x, current_y), token, font=font, fill=COLORS['body_text'])
+                            current_x += token_width
+                            pre_highlight_idx += 1
+                        
+                        # Now highlight only the words (and spaces between them)
+                        if word_indices:
+                            first_word_idx = word_indices[0]
+                            last_word_idx = word_indices[-1]
+                            
+                            # Build the phrase string from first word to last word (inclusive)
+                            phrase_str = ''.join([tokens[k] for k in range(first_word_idx, last_word_idx + 1)])
+                            
+                            bbox = draw.textbbox((0, 0), phrase_str, font=font)
+                            phrase_width = bbox[2] - bbox[0]
+                            phrase_height = bbox[3] - bbox[1]
+                            
+                            # Draw highlight rectangle
+                            draw.rectangle(
+                                [current_x - 2, current_y - 2, current_x + phrase_width + 2, current_y + phrase_height + 2],
+                                fill=(255, 235, 59)
+                            )
+                            # Draw highlighted text
+                            draw.text((current_x, current_y), phrase_str, font=font, fill=(0, 0, 0))
+                            current_x += phrase_width
+                            
+                            # Draw any trailing punctuation/spaces after the last word
+                            for k in range(last_word_idx + 1, j):
+                                token = tokens[k]
+                                bbox = draw.textbbox((0, 0), token, font=font)
+                                token_width = bbox[2] - bbox[0]
+                                draw.text((current_x, current_y), token, font=font, fill=COLORS['body_text'])
+                                current_x += token_width
+                        
+                        i = j  # move past the entire window
+                        matched = True
+                        break
+                
+                if not matched:
+                    token = tokens[i]
+                    bbox = draw.textbbox((0, 0), token, font=font)
+                    token_width = bbox[2] - bbox[0]
+                    # Default color for text
+                    draw.text((current_x, current_y), token, font=font, fill=COLORS['body_text'])
+                    current_x += token_width
+                    i += 1

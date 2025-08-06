@@ -1,6 +1,9 @@
 # reset_db.py
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.db import get_connection, init_db
+
 
 # Ensure table exists
 init_db()
