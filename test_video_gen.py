@@ -5,6 +5,7 @@ This allows you to test visual improvements without calling TTS or LLM API repea
 """
 
 from agents.visual_agent import VisualAgent
+from moviepy.editor import AudioFileClip
 import json
 import os
 
@@ -39,8 +40,8 @@ David (curious): What makes RAG truly special is its dual power to search for ac
 Narrator (informative): By retrieving data first and then generating text, RAG bridges the gap between static information and dynamic conversation, enhancing both correctness and creativity.
 David (excited): Check this out: using RAG can boost tasks like question answering, summarization, and content creation by delivering rich, precise, and engaging responses!
 Narrator (thoughtful): RAG smartly balances factual information with creative output, ensuring every answer is both informative and captivating.
-David (cheerful): Isn’t that amazing? It’s like pairing a data detective with a creative writer – the best of both worlds in one innovative model!
-David (curious): But how do we handle massive data? Doesn’t RAG need huge computing power to scan all those documents?
+David (cheerful): Isn't that amazing? It's like pairing a data detective with a creative writer – the best of both worlds in one innovative model!
+David (curious): But how do we handle massive data? Doesn't RAG need huge computing power to scan all those documents?
 Narrator (reassuring): Great question! RAG uses efficient indexing and advanced search algorithms to quickly narrow down the most relevant documents, saving time and resources.
 David (enthusiastic): This means even with vast data volumes, the system remains both practical and powerful – a real game changer for modern AI!
 Narrator (informative): Exactly. It organizes retrieval and generation steps smartly, ensuring precision and speed are maintained at every stage.
@@ -120,17 +121,6 @@ David (encouraging): Today, we unlocked the basics of RAG. Dive deeper, experime
     print("\n🎨 Initializing Visual Agent...")
     visual_agent = VisualAgent()
 
-    # Prepare input data (pass overlay_data)
-    input_data = {
-        "character": character,
-        "lesson_title": lesson_title,
-        "script": script,
-        "voice_path": audio_file,
-        "overlay_data": overlay_data,
-    }
-    if timing_data:
-        input_data["timing"] = timing_data
-
     # Test mode options
     print("\n🔧 Test Options:")
     print("1. Generate full video")
@@ -141,7 +131,7 @@ David (encouraging): Today, we unlocked the basics of RAG. Dive deeper, experime
 
     if choice == "3":
         print("\n📝 Testing slide parsing...")
-        slides = visual_agent.parse_script_to_slides(script, character['name'])
+        slides = visual_agent.script_parser.parse_script_to_slides(script, character['name'])
         print(f"\n📑 Parsed {len(slides)} slides:")
         for i, slide in enumerate(slides):
             print(f"  {i+1}. Type: {slide['type']}, "
@@ -151,19 +141,77 @@ David (encouraging): Today, we unlocked the basics of RAG. Dive deeper, experime
 
     test_mode = (choice == "2")
 
+    # Prepare input data
+    input_data = {
+        "character": character,
+        "lesson_title": lesson_title,
+        "script": script,
+        "voice_path": audio_file,
+        "overlay_data": overlay_data,
+    }
+    
+    # Handle test mode by trimming audio and timing data
+    if test_mode:
+        print("\n🔧 Preparing 30-second test clip...")
+        
+        # Trim audio to 30 seconds
+        full_audio = AudioFileClip(audio_file)
+        test_duration = min(30, full_audio.duration)
+        test_audio = full_audio.subclip(0, test_duration)
+        test_audio_path = audio_file.replace('.mp3', '_test30.mp3')
+        test_audio.write_audiofile(test_audio_path, logger=None)
+        input_data["voice_path"] = test_audio_path
+        print(f"✅ Created test audio: {test_audio_path} (duration: {test_duration:.2f}s)")
+        
+        # Trim timing data if available
+        if timing_data:
+            test_timing = []
+            for segment in timing_data:
+                if segment.get('start_time', 0) < test_duration:
+                    test_segment = segment.copy()
+                    if segment.get('end_time', 0) > test_duration:
+                        test_segment['end_time'] = test_duration
+                        test_segment['duration'] = test_duration - test_segment['start_time']
+                    test_timing.append(test_segment)
+            input_data["timing"] = test_timing
+            print(f"✅ Trimmed timing data to {len(test_timing)} segments")
+        
+        # Clean up
+        full_audio.close()
+        test_audio.close()
+    else:
+        if timing_data:
+            input_data["timing"] = timing_data
+
     try:
-        print(f"\n🎬 Generating {'test' if test_mode else 'full'} video...")
+        print(f"\n🎬 Generating {'test (30s)' if test_mode else 'full'} video...")
         print("This may take a few minutes...")
 
-        output_path = visual_agent.run(input_data, test_mode=test_mode)
+        output_path = visual_agent.run(input_data)
+
+        if test_mode:
+            # Rename output to indicate it's a test
+            test_output_path = output_path.replace('.mp4', '_test30.mp4')
+            if os.path.exists(output_path):
+                os.rename(output_path, test_output_path)
+                output_path = test_output_path
 
         print(f"\n✅ Video generated successfully!")
         print(f"📹 Output: {output_path}")
+        
+        # Clean up test audio if created
+        if test_mode and os.path.exists(test_audio_path):
+            os.remove(test_audio_path)
+            print(f"🧹 Cleaned up test audio file")
 
     except Exception as e:
         print(f"\n❌ Error generating video: {e}")
         import traceback
         traceback.print_exc()
+        
+        # Clean up on error
+        if test_mode and 'test_audio_path' in locals() and os.path.exists(test_audio_path):
+            os.remove(test_audio_path)
 
 def test_visual_improvements():
     """Test specific visual improvements"""
