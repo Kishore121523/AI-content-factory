@@ -1,4 +1,3 @@
-from agents.base_agent import Agent
 from moviepy.editor import AudioFileClip, ImageClip
 import numpy as np
 import os
@@ -13,11 +12,10 @@ from .slide_renderer import SlideRenderer
 from .video_composer import VideoComposer
 from .moviepy_overlay_manager import MoviePyOverlayManager
 
-class VisualAgent(Agent):
+class VisualAgent():
     """Main Visual Agent for educational video generation"""
     
     def __init__(self):
-        super().__init__("VisualAgent")
         self.output_dir = "output"
         os.makedirs(self.output_dir, exist_ok=True)
         

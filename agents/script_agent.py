@@ -1,15 +1,13 @@
 import difflib
 import json
-from agents.base_agent import Agent
 import openai
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-class ScriptAgent(Agent):
+class ScriptAgent():
     def __init__(self):
-        super().__init__("ScriptAgent")
         self.client = openai.AzureOpenAI(
             api_key=os.getenv("AZURE_OPENAI_LLM_KEY"),
             api_version=os.getenv("AZURE_OPENAI_LLM_API_VERSION"),

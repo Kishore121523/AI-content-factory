@@ -1,4 +1,3 @@
-from agents.base_agent import Agent
 import openai
 import os
 import json
@@ -7,9 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-class CurriculumAgent(Agent):
+class CurriculumAgent():
     def __init__(self):
-        super().__init__("CurriculumAgent")
         self.client = openai.AzureOpenAI(
             api_key=os.getenv("AZURE_OPENAI_LLM_KEY"),
             api_version=os.getenv("AZURE_OPENAI_LLM_API_VERSION"),

@@ -1,4 +1,3 @@
-from agents.base_agent import Agent
 from utils.db import get_connection
 import openai
 import os
@@ -8,9 +7,8 @@ import json
 
 load_dotenv()
 
-class CharacterAgent(Agent):
+class CharacterAgent():
     def __init__(self):
-        super().__init__("CharacterAgent")
         self.client = openai.AzureOpenAI(
             api_key=os.getenv("AZURE_OPENAI_LLM_KEY"),
             api_version=os.getenv("AZURE_OPENAI_LLM_API_VERSION"),

@@ -1,4 +1,3 @@
-from agents.base_agent import Agent
 import azure.cognitiveservices.speech as speechsdk
 from pydub import AudioSegment
 import os
@@ -15,11 +14,10 @@ from .constants import TITLE_SILENCE_MS, SEGMENT_PADDING_MS, END_SILENCE_MS
 
 load_dotenv()
 
-class VoiceAgent(Agent):
+class VoiceAgent():
     """Main Voice Agent for text-to-speech synthesis with emotions"""
     
     def __init__(self):
-        super().__init__("VoiceAgent")
         
         # Azure TTS configuration
         self.speech_key = os.getenv("AZURE_OPENAI_TTS_KEY")
