@@ -96,7 +96,6 @@ Notes:
 ```
 content-factory/                                        
 ├── agents/                                       # Core agent modules
-│   ├── base_agent.py                             # Base agent class (common logic for all agents)
 │   ├── character_agent.py                        # Character creation/generation agent
 │   ├── curriculum_agent.py                       # Lesson/curriculum planning agent
 │   ├── script_agent.py                           # Script writing/generation agent
