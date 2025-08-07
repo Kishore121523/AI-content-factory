@@ -12,6 +12,9 @@ An AI-powered educational content generation system that creates full educationa
 - **Professional Video Generation**: HD videos with large avatars and synchronized audio
 - **Character Persistence**: Reuse characters across multiple videos
 - **Robust Error Handling**: Retry logic and graceful fallbacks
+- **REST API Backend**: Programmatically trigger the full pipeline, generate/download media, or integrate with your own UI
+- **Streamlit UI**: No-code web interface for one-click video generation and download
+- **Automated QA Checks**: Post-generation quality analysis and warnings for alignment, timing, and overlays
 
 ## 🎥 Sample Output
 
@@ -86,6 +89,67 @@ Notes:
 - Coordinator manages all agents but doesn't appear in data flow
 - Each agent receives specific inputs from previous stages
 - All agents are independent and communicate only through the coordinator
+- QA module runs after video generation to check for timing, script, overlay, and alignment issues
+```
+
+## 🧩 Project Structure
+
+```
+content-factory/                                        
+├── agents/                                       # Core agent modules
+│   ├── base_agent.py                             # Base agent class (common logic for all agents)
+│   ├── character_agent.py                        # Character creation/generation agent
+│   ├── curriculum_agent.py                       # Lesson/curriculum planning agent
+│   ├── script_agent.py                           # Script writing/generation agent
+│   ├── voice_agent/                              # Voice synthesis and processing
+│   │   ├── __init__.py
+│   │   ├── audio_synthesizer.py                  # Voice audio synthesis logic
+│   │   ├── constants.py                          # Voice agent configuration/constants
+│   │   ├── script_processor.py                   # Processes scripts for TTS
+│   │   ├── ssml_builder.py                       # Builds SSML for expressive speech
+│   │   ├── style_manager.py                      # Handles voice styles/parameters
+│   │   └── voice_agent.py                        # Main voice agent orchestration
+│   └── visual_agent/                             # Video generation and overlays
+│       ├── __init__.py
+│       ├── avatar_manager.py                     # Avatar image handling/selection
+│       ├── constants.py                          # Visual agent configuration/constants
+│       ├── moviepy_overlay_manager.py            # Adds overlays (e.g., captions, graphics)
+│       ├── script_parser.py                      # Parses scripts for visual rendering
+│       ├── slide_renderer.py                     # Creates individual slides
+│       ├── text_utils.py                         # Text formatting, splitting, utilities
+│       ├── ui_components.py                      # Draws UI-like elements on slides
+│       ├── video_composer.py                     # Assembles video from slides and audio
+│       └── visual_agent.py                       # Main visual agent (video pipeline)
+├── avatars/                                      # Character/avatar images
+│   ├── female/
+│   │   ├── avatar_1.gif                          # Female avatar (GIF animation)
+│   │   ├── avatar_1.png
+│   │   ├── avatar_2.png
+│   │   └── avatar_3.png
+│   └── male/
+│       ├── avatar_1.gif                          # Male avatar (GIF animation)
+│       ├── avatar_1.png
+│       ├── avatar_2.png
+│       └── avatar_3.png
+├── databaseFunctions/                            # Scripts for managing the DB
+│   ├── reset_db.py                               # Reset/initialize database
+│   └── view_characters.py                        # Script to view character entries
+├── logs/                                         # Stores the logs generated from QA check
+├── output/                                       # Generated audio/video/timing files
+├── utils/                                        # Utility/helper scripts
+│   └── db.py                                     # DB connection/utilities
+│   └── qa.py                                     # QA checks after each video generation
+├── venv/                                         # Python virtual environment files
+├── .gitignore                                    # Git ignore file
+├── content_factory.db                            # SQLite database file
+├── backend.py                                    # API endpoints setup
+├── streamlit_app.py                              # Front-end app using Streamlit
+├── coordinator.py                                # Main agent orchestration logic
+├── main.py                                       # Project entry point script
+├── README.md                                     # Project documentation
+├── requirements.txt                              # Python dependencies
+├── test_voice_styles.py                          # Voice style test script
+└── test_video_gen.py                             # Video generation test script
 ```
 
 ## 📋 Prerequisites
@@ -162,16 +226,46 @@ You'll need Azure OpenAI API keys for:
 
 ## 💻 Usage
 
-### Basic Usage
-
+### 1. **CLI / Script Mode**
+For devs and power users.
 ```bash
 python main.py
 ```
+- Enter your educational topic (e.g., "Water Cycle", "Photosynthesis")
+- Enter a character name or press Enter for default "Zara"
+- Wait for the video generation (typically 1-2 minutes)
+- Outputs: MP4 video, MP3 audio, and timing JSON in the `output/` folder
 
-Follow the prompts:
-1. Enter your educational topic (e.g., "Water Cycle", "Photosynthesis")
-2. Enter a character name or press Enter for default "Zara"
-3. Wait for the video generation (typically 2-5 minutes)
+### 2. **Run as an API Server**
+Start the backend (FastAPI) server for web, programmatic, or Streamlit UI access:
+```bash
+uvicorn backend:app --reload
+```
+#### **Key API Endpoints:**
+- `POST /api/pipeline/start`: Start the full generation pipeline (topic, character, num_lessons)
+- `GET /api/job/{job_id}`: Get job status, logs, and results
+- `GET /api/download/{filename}`: Download generated MP4/MP3 files
+- `GET /api/stream/{filename}`: Stream video file for preview
+- More endpoints available for individual stages (curriculum, character, script, voice, video)
+
+### 3. **Web UI**
+Launch the Streamlit frontend:
+```bash
+streamlit run streamlit_app.py
+```
+- Enter a topic, pick a character name, set the number of lessons
+- Hit "Generate Video" and watch logs & progress in real time
+- Download video/audio as soon as they're ready, with lesson summaries and process logs shown in the UI
+
+### 4. **Test Mode**
+Test video generation without TTS API calls:
+```bash
+python test_video_gen.py
+```
+Test voice styles:
+```bash
+python debug_voice_styles.py
+```
 
 ### Output Files
 
@@ -180,84 +274,11 @@ Generated files are saved in the `output/` directory:
 - `CharacterName_Lesson_Title.mp3` - Audio narration
 - `CharacterName_Lesson_Title_timing.json` - Synchronization data
 
-### Test Mode
+### QA Reports
 
-Test video generation without TTS API calls:
-```bash
-python test_video_gen.py
-```
+QA reports are generated in the `logs/` directory for each lesson (e.g., `My_Lesson_qa_report.txt`), highlighting any warnings about segment timing, overlay issues, or speaker alignment.
 
-Test voice styles:
-```bash
-python debug_voice_styles.py
-```
-
-## 🧩 Project Structure
-
-```
-content-factory/                                        
-├── agents/                                       # Core agent modules
-│   ├── __pycache__/                              # Python bytecode cache
-│   ├── base_agent.py                             # Base agent class (common logic for all agents)
-│   ├── character_agent.py                        # Character creation/generation agent
-│   ├── curriculum_agent.py                       # Lesson/curriculum planning agent
-│   ├── script_agent.py                           # Script writing/generation agent
-│   ├── voice_agent/                              # Voice synthesis and processing
-│   │   ├── __pycache__/
-│   │   ├── __init__.py
-│   │   ├── audio_synthesizer.py                  # Voice audio synthesis logic
-│   │   ├── constants.py                          # Voice agent configuration/constants
-│   │   ├── script_processor.py                   # Processes scripts for TTS
-│   │   ├── ssml_builder.py                       # Builds SSML for expressive speech
-│   │   ├── style_manager.py                      # Handles voice styles/parameters
-│   │   └── voice_agent.py                        # Main voice agent orchestration
-│   └── visual_agent/                             # Video generation and overlays
-│       ├── __pycache__/
-│       ├── __init__.py
-│       ├── avatar_manager.py                     # Avatar image handling/selection
-│       ├── constants.py                          # Visual agent configuration/constants
-│       ├── moviepy_overlay_manager.py            # Adds overlays (e.g., captions, graphics)
-│       ├── script_parser.py                      # Parses scripts for visual rendering
-│       ├── slide_renderer.py                     # Creates individual slides
-│       ├── text_utils.py                         # Text formatting, splitting, utilities
-│       ├── ui_components.py                      # Draws UI-like elements on slides
-│       ├── video_composer.py                     # Assembles video from slides and audio
-│       └── visual_agent.py                       # Main visual agent (video pipeline)
-├── avatars/                                      # Character/avatar images
-│   ├── female/
-│   │   ├── avatar_1.gif                          # Female avatar (GIF animation)
-│   │   ├── avatar_1.png
-│   │   ├── avatar_2.png
-│   │   └── avatar_3.png
-│   └── male/
-│       ├── avatar_1.gif                          # Male avatar (GIF animation)
-│       ├── avatar_1.png
-│       ├── avatar_2.png
-│       └── avatar_3.png
-├── databaseFunctions/                            # Scripts for managing the DB
-│   ├── reset_db.py                               # Reset/initialize database
-│   └── view_characters.py                        # Script to view character entries
-├── logs/                                         # Stores the logs generated from QA check
-├── output/                                       # Generated audio/video/output files
-│   ├── David_Introduction_to_Retrieval-Augmented_Generation_(RAG).mp3      # Sample output (audio)
-│   ├── David_Introduction_to_Retrieval-Augmented_Generation_(RAG).mp4      # Sample output (video)
-│   └── David_Introduction_to_Retrieval-Augmented_Generation_(RAG)_timing.json # Output timings
-├── utils/                                        # Utility/helper scripts
-│   ├── __pycache__/
-│   └── db.py                                     # DB connection/utilities
-│   └── qa.py                                     # QA checks after each video generation
-├── venv/                                         # Python virtual environment
-│   └── [virtual environment files]
-├── .gitignore                                    # Git ignore file
-├── content_factory.db                            # SQLite database file
-├── coordinator.py                                # Main agent orchestration logic
-├── main.py                                       # Project entry point script
-├── README.md                                     # Project documentation
-├── requirements.txt                              # Python dependencies
-├── test_voice_styles.py                          # Voice style test script
-└── test_video_gen.py                             # Video generation test script
-
-```
+---
 
 ## 🎨 Customization
 
@@ -266,7 +287,7 @@ content-factory/
 2. Images should be square, ideally 512x512px or larger
 3. Transparent background recommended
 
-### Modifying Visual Style
+### Modifying Video's Visual Style
 Edit constants in `agents/visual_agent/constants.py`:
 - Colors, sizes, layouts
 - Transition durations
@@ -283,18 +304,15 @@ Characters are stored in SQLite database with:
 - Voice style preferences
 - Avatar selection
 
+---
+
 ## 🧪 Development
 
 ### Running Tests
 ```bash
-# Test video generation with existing audio
-python test_video_gen.py
-
-# Test voice styles
-python debug_voice_styles.py
-
-# Generate single video for testing
-python main.py 
+python test_video_gen.py      # Test video generation with existing audio
+python debug_voice_styles.py  # Test voice styles
+python main.py                # Generate single video for testing
 ```
 
 ### Adding New Agents
@@ -307,8 +325,18 @@ python main.py
 - Use timing JSON files for synchronization debugging
 - Check `output/` for intermediate files
 - Review agent outputs at each pipeline stage
+- Do not remove the audio file in output/ that starts with David_, as it is used in test_video_gen.py
 
-## 🐛 Troubleshooting
+---
+
+## 🔎 Automated QA & Troubleshooting
+
+### Automated QA Checks (`utils/qa.py`)
+- **Segment timing:** Detects overlaps, large gaps, and overly long/empty segments
+- **Speaker/slide alignment:** Finds mismatches between slides and timing data
+- **Overlay coverage:** Verifies caption triggers and highlight keywords appear in the script
+- **Collision detection:** Checks for overlay timing collisions (captions vs. emphasis)
+- **Detailed logs:** QA report saved for each lesson in `logs/` and shown in backend logs
 
 ### Common Issues
 
@@ -334,8 +362,9 @@ python main.py
 ### Performance Optimization
 - Use test mode for development
 - Pre-generate common characters
-- Batch process multiple videos
 - Adjust video quality settings in constants
+
+---
 
 ## 📄 License
 
