@@ -1,17 +1,15 @@
-# voice_agent/ssml_builder.py - SSML Document Builder
-
 from typing import Optional
 
+#Builds SSML documents for Azure TTS
 class SSMLBuilder:
-    """Builds SSML documents for Azure TTS"""
     
     def __init__(self, style_manager, script_processor):
         self.style_manager = style_manager
         self.script_processor = script_processor
     
+    #Create SSML document with voice and style with degree control
     def create_ssml(self, text: str, voice_name: str, style: str, 
                     emotion: Optional[str] = None) -> str:
-        """Create SSML document with voice and style with degree control"""
         # Clean text for XML
         clean_text = self.script_processor.escape_xml_text(text)
         

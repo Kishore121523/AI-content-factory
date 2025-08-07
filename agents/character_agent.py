@@ -4,6 +4,7 @@ import openai
 import os
 import random
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -53,8 +54,6 @@ class CharacterAgent(Agent):
 
         raw = response.choices[0].message.content.strip()
         try:
-            # Try to parse as JSON
-            import json
             character_data = json.loads(raw)
             
             # Ensure gender is included
@@ -106,7 +105,7 @@ class CharacterAgent(Agent):
                     "gender": row[1] or 'female',
                     "description": row[2], 
                     "voice_style": row[3],
-                    "avatar_id": row[4] or 1  # Default to avatar 1 if NULL
+                    "avatar_id": row[4] or 1
                 }
         finally:
             conn.close()

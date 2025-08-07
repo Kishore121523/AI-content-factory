@@ -1,5 +1,3 @@
-# voice_agent/constants.py - Voice Agent Constants
-
 # Timing constants
 TITLE_SILENCE_MS = 3000  # 3 seconds for title slide
 SEGMENT_PADDING_MS = 700  # 0.7 seconds between segments

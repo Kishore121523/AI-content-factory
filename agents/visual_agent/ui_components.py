@@ -1,5 +1,3 @@
-# ui_components.py - Reusable UI Component Rendering
-
 import re
 from PIL import ImageDraw
 from typing import List, Tuple

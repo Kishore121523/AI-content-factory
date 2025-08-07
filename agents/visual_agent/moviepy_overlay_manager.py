@@ -1,20 +1,17 @@
 from moviepy.editor import TextClip, CompositeVideoClip
 from typing import List, Dict, Tuple
-import concurrent.futures
 from functools import lru_cache
 
-class MoviePyOverlayManager:
-    """Optimized text overlays for MoviePy with performance improvements"""
-    
+class MoviePyOverlayManager:    
     def __init__(self, video_size):
         self.video_size = video_size
         self.width, self.height = video_size
-        # Cache for text clip creation parameters
+        # Cache for text clip creation parameters for efficient access
         self._clip_cache = {}
-        
+    
+    #Caches text dimensions to avoid repeated calculations
     @lru_cache(maxsize=128)
     def _get_text_dimensions(self, text: str, fontsize: int) -> Tuple[int, int]:
-        """Cache text dimensions to avoid repeated calculations"""
         # This is a placeholder - actual dimensions would come from TextClip
         # but caching the concept helps avoid recreation
         return (int(self.width * 0.8), None)
@@ -47,7 +44,6 @@ class MoviePyOverlayManager:
 
     def create_caption_overlays(self, base_video, timing_data: List[Dict], 
                                caption_phrases: List[Dict], used_segment_indices=None) -> Tuple[CompositeVideoClip, set]:
-        """Optimized caption overlay creation"""
         overlays = []
         used_triggers = set()
         used_indices = used_segment_indices or set()
@@ -100,8 +96,8 @@ class MoviePyOverlayManager:
                     used_triggers.add(caption['id'])
                     break
         
+        # Batch composite for better performance
         if overlays:
-            # Batch composite for better performance
             return CompositeVideoClip([base_video] + overlays), used_indices
         else:
             return base_video, used_indices

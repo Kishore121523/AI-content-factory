@@ -1,5 +1,3 @@
-# agents/script_agent.py
-
 import difflib
 import json
 from agents.base_agent import Agent
@@ -184,7 +182,7 @@ class ScriptAgent(Agent):
             
             return overlay_data
             
-        except json.JSONDecodeError as e:
+        except Exception as e:
             print(f"⚠️ Failed to parse overlay JSON: {e}")
             # Return default structure
             return {
@@ -192,17 +190,10 @@ class ScriptAgent(Agent):
                 "caption_phrases": [],
                 "emphasis_points": []
             }
-        except Exception as e:
-            print(f"⚠️ Error extracting overlay data: {e}")
-            return {
-                "highlight_keywords": [],
-                "caption_phrases": [],
-                "emphasis_points": []
-            }
 
     
+    #Extract personality traits from character description
     def extract_personality(self, character):
-        """Extract personality traits from character description"""
         description = character.get('description', '')
         voice_style = character.get('voice_style', '')
         
@@ -224,16 +215,17 @@ class ScriptAgent(Agent):
         else:
             return "An engaging and enthusiastic educator"
     
+    #Check if script has proper emotion tags
     def validate_emotions(self, script):
-        """Check if script has proper emotion tags"""
         import re
         # Check for pattern: Speaker (emotion):
         pattern = r'\w+\s*\([^)]+\):'
         matches = re.findall(pattern, script)
-        return len(matches) >= 4  # Should have at least 4 emotion tags
+        # Should have at least 4 emotion tags
+        return len(matches) >= 4 
     
+    #Add default emotions if missing
     def add_default_emotions(self, script, character_name):
-        """Add default emotions if missing"""
         import re
         
         # Common patterns to add emotions to
@@ -249,40 +241,66 @@ class ScriptAgent(Agent):
         
         return script
 
+# Function that fixes triggers that are present but not exact matches, preserving as many as possible.
 @staticmethod
 def fix_or_validate_caption_triggers(overlay_data, script, min_ratio=0.6):
-    """
-    Ensure each caption trigger is a substring of the script. If not, replace it
-    with the closest match found in the script using fuzzy matching.
-    """
     script_lower = script.lower()
     words = script_lower.split()
     valid_captions = []
 
-    for c in overlay_data.get('caption_phrases', []):
-        trigger = c['trigger'].strip().lower()
+    for c in overlay_data.get("caption_phrases", []):
+        trigger_raw = c.get("trigger", "")
+        trigger = trigger_raw.strip().lower()
 
+        if not trigger:
+            print(f"⚠️ WARNING: Empty caption trigger found. Removing this caption.")
+            continue
+
+        # Exact substring match → accept as-is and exit
         if trigger in script_lower:
             valid_captions.append(c)
             continue
 
-        best_match = None
-        best_ratio = 0
+        # Tokenize trigger once and compute window length
+        trigger_tokens = trigger.split()
+        tlen = len(trigger_tokens)
+        if tlen == 0 or len(words) < tlen:
+            print(f"⚠️ WARNING: Trigger longer than script or empty: '{trigger}'. Removing this caption.")
+            continue
 
-        trigger_len = len(trigger.split())
-        for i in range(len(words) - trigger_len + 1):
-            window = ' '.join(words[i:i + trigger_len])
-            ratio = difflib.SequenceMatcher(None, trigger, window).ratio()
+        # Reuse ONE SequenceMatcher; set seq1 once (trigger), and only swap seq2 per window
+        sm = difflib.SequenceMatcher(None, trigger_tokens, [])
+        best_ratio = 0.0
+        best_slice = None 
+
+        # Slide a token window across the script
+        for i in range(len(words) - tlen + 1):
+            window_tokens = words[i:i + tlen]
+            sm.set_seq2(window_tokens)
+            ratio = sm.ratio()  # 0 to 1
+
             if ratio > best_ratio:
                 best_ratio = ratio
-                best_match = window
+                best_slice = (i, i + tlen)
 
-        if best_ratio >= min_ratio and best_match:
-            print(f"🔄 Replacing trigger '{trigger}' with closest match in script: '{best_match}' (ratio={best_ratio:.2f})")
-            c['trigger'] = best_match
+                # Early exit if good enough
+                if best_ratio >= 0.6:
+                    break
+
+        # Decide whether to replace or drop the caption based on min_ratio
+        if best_slice and best_ratio >= min_ratio:
+            best_match_str = " ".join(words[best_slice[0]:best_slice[1]])
+            print(
+                f"🔄 Replacing trigger '{trigger}' with closest match in script: "
+                f"'{best_match_str}' (ratio={best_ratio:.2f})"
+            )
+            c["trigger"] = best_match_str
             valid_captions.append(c)
         else:
-            print(f"⚠️ WARNING: Could not find suitable match for caption trigger: '{trigger}'. Removing this caption.")
+            print(
+                f"⚠️ WARNING: Could not find suitable match for caption trigger: "
+                f"'{trigger}' (best_ratio={best_ratio:.2f}). Removing this caption."
+            )
 
-    overlay_data['caption_phrases'] = valid_captions
+    overlay_data["caption_phrases"] = valid_captions
     return overlay_data

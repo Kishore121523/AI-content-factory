@@ -1,5 +1,3 @@
-# constants.py - Visual Agent Constants and Configuration
-
 # Video settings
 VIDEO_SIZE = (1280, 720)  # HD
 FPS = 24

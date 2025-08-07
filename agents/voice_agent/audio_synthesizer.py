@@ -1,8 +1,6 @@
-# voice_agent/audio_synthesizer.py - Audio Synthesis Handler
-
 import azure.cognitiveservices.speech as speechsdk
 from pydub import AudioSegment
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 import os
 from .constants import (
     TITLE_SILENCE_MS, SEGMENT_PADDING_MS, END_SILENCE_MS,
@@ -30,6 +28,7 @@ class AudioSynthesizer:
             if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
                 print(f"✅ SSML audio segment saved")
                 return True
+
             elif result.reason == speechsdk.ResultReason.Canceled:
                 cancellation_details = result.cancellation_details
                 print(f"❌ Speech synthesis canceled: {cancellation_details.reason}")
@@ -46,7 +45,6 @@ class AudioSynthesizer:
     
     def combine_audio_segments(self, segment_infos: List[Tuple[str, float]], 
                              output_path: str) -> AudioSegment:
-        """Combine audio segments with timing"""
         combined_audio = AudioSegment.silent(duration=0)
         
         # Add initial silence for title slide

@@ -22,7 +22,6 @@ The system generates professional educational videos with:
 - Character avatars
 - Speech bubbles with speaker indicators
 - Smooth transitions between slides
-- Progress tracking
 - Synchronized audio with emotional expression
 
 ## 🏗️ Architecture
@@ -147,6 +146,7 @@ content-factory/
 ├── coordinator.py                                # Main agent orchestration logic
 ├── main.py                                       # Project entry point script
 ├── README.md                                     # Project documentation
+├── README_API_WORKFLOW.md                        # API documentation
 ├── requirements.txt                              # Python dependencies
 ├── test_voice_styles.py                          # Voice style test script
 └── test_video_gen.py                             # Video generation test script

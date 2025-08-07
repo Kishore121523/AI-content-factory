@@ -1,5 +1,3 @@
-# voice_agent/script_processor.py - Script Processing Utilities
-
 import re
 from typing import List, Dict
 

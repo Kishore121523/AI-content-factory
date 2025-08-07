@@ -1,7 +1,8 @@
 📬 Example API Workflow (Postman Step-by-Step)
 ----------------------------------------------
 
-Below is a full example of using each REST API endpoint in sequence with sample requests and actual responses. 
+Below is a full example of using each REST API endpoint in sequence with sample requests and actual responses.
+At the end of this file, you will find `Automated Pipeline` and `View Logs` which is used by the frontend application
 
 **MAKE SURE TO START YOUR FastAPI SERVER (backend.py)**
 ```bash

@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
 """
-test_video_generation.py - Test video generation with existing audio and overlays
 This allows you to test visual improvements without calling TTS or LLM API repeatedly.
 """
 

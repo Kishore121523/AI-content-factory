@@ -1,17 +1,15 @@
-# avatar_manager.py - Avatar Loading and Management
-
 import os
 from PIL import Image, ImageDraw, ImageFont
 from typing import Optional, Dict
 from .constants import AVATAR_SIZE, COLORS
 
 class AvatarManager:
-    """Manages avatar loading, caching, and creation"""
     
     def __init__(self, avatar_dir: str = "avatars"):
         self.avatar_dir = avatar_dir
         self.avatar_cache: Dict[str, Image.Image] = {}
     
+    # Builds the path using avatar_id and fetches it from its corresponding path
     def load_avatar(self, gender: str, avatar_id: int, size: int = AVATAR_SIZE) -> Optional[Image.Image]:
         """Load and cache avatar image"""
         cache_key = f"{gender}_{avatar_id}_{size}"
@@ -31,8 +29,8 @@ class AvatarManager:
             print(f"⚠️ Could not load avatar {avatar_path}: {e}")
             return None
     
+    # Fallback - Create a default avatar if image not found
     def create_default_avatar(self, initial: str, is_character: bool, size: int = AVATAR_SIZE) -> Image.Image:
-        """Create a default avatar if image not found"""
         avatar = Image.new('RGBA', (size, size), (0, 0, 0, 0))
         draw = ImageDraw.Draw(avatar)
         
@@ -58,9 +56,9 @@ class AvatarManager:
         
         return avatar
     
+    # Function that returns the avatar for character or narrator, with fallback to default
     def get_avatar(self, character: Dict, is_narrator: bool = False, 
                    narrator_avatar_id: int = 1, size: int = AVATAR_SIZE) -> Image.Image:
-        """Get avatar for character or narrator, with fallback to default"""
         if is_narrator:
             avatar = self.load_avatar('female', narrator_avatar_id, size)
             initial = 'N'

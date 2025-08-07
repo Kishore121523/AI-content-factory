@@ -1,5 +1,3 @@
-# agents/base_agent.py
-
 class Agent:
     def __init__(self, name):
         self.name = name

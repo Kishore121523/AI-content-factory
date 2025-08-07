@@ -1,5 +1,3 @@
-# visual_agent.py - Educational Video Generator (Refactored)
-
 from agents.base_agent import Agent
 from moviepy.editor import AudioFileClip, ImageClip
 import numpy as np

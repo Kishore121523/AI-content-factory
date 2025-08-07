@@ -1,5 +1,3 @@
-# utils/qa.py
-
 import re
 
 def _normalize(text):
@@ -168,7 +166,7 @@ def run_video_qa(
                 )
                 log(collisions[-1])
 
-    # Always add a note about overlay logic, even if there are no collisions or if collisions are detected but fixed
+    # Add a note about overlay logic, even if there are no collisions or if collisions are detected but fixed
     if (caption_times or emphasis_times):
         if collisions:
             log("✅ Overlay collisions are automatically handled in the renderer, so no visual overlap occurs in the output.")

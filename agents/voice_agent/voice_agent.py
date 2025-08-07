@@ -1,5 +1,3 @@
-# voice_agent/voice_agent.py - Main Voice Agent
-
 from agents.base_agent import Agent
 import azure.cognitiveservices.speech as speechsdk
 from pydub import AudioSegment

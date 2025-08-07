@@ -1,5 +1,4 @@
 """
-Simplified Streamlit Frontend - No polling needed
 Run with: streamlit run streamlit_simplified.py
 """
 

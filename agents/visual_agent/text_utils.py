@@ -1,5 +1,3 @@
-# text_utils.py - Text and Font Management Utilities
-
 from PIL import Image, ImageDraw, ImageFont
 from typing import Dict, List, Optional, Tuple
 from .constants import FONT_PATHS, FONT_SIZES

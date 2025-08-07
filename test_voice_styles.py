@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Debug and test different voice styles
 """

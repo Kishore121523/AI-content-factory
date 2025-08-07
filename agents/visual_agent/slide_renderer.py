@@ -1,5 +1,3 @@
-# slide_renderer.py - Slide Rendering Logic
-
 from PIL import Image, ImageDraw
 from typing import Dict, Tuple
 from .constants import *

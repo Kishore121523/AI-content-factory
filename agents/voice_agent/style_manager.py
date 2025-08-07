@@ -1,5 +1,3 @@
-# voice_agent/style_manager.py - Voice Style Management
-
 from typing import Dict
 from .constants import (
     EMOTION_TO_STYLE, DESCRIPTION_KEYWORDS, EMOTION_DEGREES,
@@ -7,8 +5,8 @@ from .constants import (
     FEMALE_CHARACTER_VOICE
 )
 
+#Manages voice styles, emotions, and voice selection
 class StyleManager:
-    """Manages voice styles, emotions, and voice selection"""
     
     def get_base_style(self, description: str, voice_style: str) -> str:
         """Determine base style from character description"""
@@ -50,8 +48,8 @@ class StyleManager:
         else:
             return voice_styles[0] if voice_styles else "cheerful"
     
+    #Get appropriate voice with better variety
     def get_voice_for_speaker(self, speaker: str, character_name: str, gender: str) -> str:
-        """Get appropriate voice with better variety"""
         if speaker.lower() == "narrator":
             return NARRATOR_VOICE
         

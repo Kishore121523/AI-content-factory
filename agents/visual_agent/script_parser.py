@@ -1,5 +1,3 @@
-# script_parser.py - Script Parsing Utilities
-
 import re
 from typing import List, Dict
 

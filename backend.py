@@ -1,5 +1,4 @@
 """
-Simplified Modular Backend - No real-time updates needed
 Run with: uvicorn backend:app --reload
 """
 
