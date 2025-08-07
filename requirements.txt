@@ -8,3 +8,7 @@ imageio-ffmpeg==0.4.8
 Pillow==10.0.0
 numpy==1.24.3
 pydub
+fastapi
+uvicorn
+streamlit
+requests
