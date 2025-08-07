@@ -1,8 +1,0 @@
-Timing segments: 10
-Character: Unknown (Avatar: N/A, Style: N/A)
-No slides data for QA.
-All caption triggers found in script.
-All highlight keywords found in script.
-5 highlight keywords: Mount Everest, Himalayas, tectonic movements, geological forces, cultural significance
-3 caption(s)
-2 emphasis point(s)

@@ -281,7 +281,7 @@ async def run_pipeline(job_id: str, topic: str, character_name: str, num_lessons
         }
         
         # 2. Character
-        add_log(f"🎭 Cnfiguring character: {character_name}")
+        add_log(f"🎭 Configuring character: {character_name}")
         char_req = CharacterRequest(name=character_name)
         char_resp = await create_character(char_req)
         character_id = char_resp["character_id"]
@@ -315,7 +315,7 @@ async def run_pipeline(job_id: str, topic: str, character_name: str, num_lessons
         video_resp = await generate_video(video_req)
         add_log(f"✅ Video generation complete")
         
-        # 6. QA (with proper data)
+        # 6. QA
         try:
             add_log(f"🔍 Running QA checks...")
             
@@ -353,6 +353,7 @@ async def run_pipeline(job_id: str, topic: str, character_name: str, num_lessons
             
             if qa_warnings:
                 add_log(f"⚠️ QA found {len(qa_warnings)} warning(s)")
+                add_log(f"✅ Overlay collisions are automatically handled in the renderer")
             else:
                 add_log(f"✅ QA checks passed successfully")
                 

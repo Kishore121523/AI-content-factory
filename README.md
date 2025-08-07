@@ -231,7 +231,7 @@ For devs and power users.
 ```bash
 python main.py
 ```
-- Enter your educational topic (e.g., "Water Cycle", "Photosynthesis")
+- Enter your educational topic (e.g., "Agentic RAG", "Vanishing Gradients")
 - Enter a character name or press Enter for default "Zara"
 - Wait for the video generation (typically 1-2 minutes)
 - Outputs: MP4 video, MP3 audio, and timing JSON in the `output/` folder

@@ -1,8 +1,0 @@
-Timing segments: 11
-Character: Kishore (Avatar: 3, Style: clear and engaging)
-Slide/speaker alignment looks OK.
-All caption triggers found in script.
-All highlight keywords found in script.
-6 highlight keywords: tectonic plates, Himalayas, orogeny, Indian plate, Eurasian plate, seismic activity
-3 caption(s)
-2 emphasis point(s)

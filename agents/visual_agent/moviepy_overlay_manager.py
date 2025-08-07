@@ -157,7 +157,7 @@ class MoviePyOverlayManager:
         Optimized overlay application with single composition pass
         """
         all_overlays = []
-        used_indices = set()
+        used_indices = set() # used_indices is set to keep track of timing segments that have already had a caption overlay applied
         
         # Process captions first
         captions = overlay_data.get('caption_phrases', [])
