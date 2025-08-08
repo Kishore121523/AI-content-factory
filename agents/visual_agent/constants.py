@@ -1,5 +1,5 @@
 # Video settings
-VIDEO_SIZE = (1280, 720)  # HD
+VIDEO_SIZE = (1280, 720)
 FPS = 24
 VIDEO_CODEC = 'libx264'
 AUDIO_CODEC = 'aac'

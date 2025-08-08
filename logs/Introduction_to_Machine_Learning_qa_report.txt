@@ -1,10 +1,10 @@
-Timing segments: 10
-Character: Kishore (Avatar: 3, Style: clear and engaging)
+Timing segments: 14
+Character: Mansi (Avatar: 1, Style: clear and engaging)
 Slide/speaker alignment looks OK.
 All caption triggers found in script.
 All highlight keywords found in script.
-5 highlight keywords: machine learning, algorithms, data, artificial intelligence, models
+5 highlight keywords: Machine Learning, data, models, algorithms, predictions
 3 caption(s)
 2 emphasis point(s)
-⚠️ Overlay collision: Caption 'Accurate data drives effi' and Emphasis 'Quality data and continuo' overlap (83.58-100.64s)
+⚠️ Overlay collision: Caption 'Machines extract patterns' and Emphasis 'Machine Learning: Compute' overlap (3.00-12.61s)
 ✅ Overlay collisions are automatically handled in the renderer, so no visual overlap occurs in the output.

@@ -1,4 +1,5 @@
-# pip install -r requirements.txt
+# Before you start, go through the readme file to setup external dependencies
+#pip install -r requirements.txt
 python-dotenv
 openai
 azure-cognitiveservices-speech
