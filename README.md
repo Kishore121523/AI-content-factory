@@ -19,7 +19,7 @@ An AI-powered educational content generation system that creates full educationa
 ## 🎥 Sample Output
 
 The system generates professional educational videos with:
-- Character avatars
+- Character avatars with gender matched voices
 - Speech bubbles with speaker indicators
 - Smooth transitions between slides
 - Synchronized audio with emotional expression
